@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Certified Educator Practical Exam Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        google: {
+                            blue: '#1a73e8',
+                            red: '#ea4335',
+                            yellow: '#fbbc04',
+                            green: '#34a853',
+                            gray: '#f8f9fa',
+                            darkGray: '#3c4043'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Google Sans', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for mock app feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+        .app-active-tab {
+            border-bottom: 3px solid #1a73e8;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        .task-completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between shadow-sm z-30">
+        <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-1.5 text-xl font-bold">
+                <span class="text-blue-600">G</span>
+                <span class="text-red-500">o</span>
+                <span class="text-amber-500">o</span>
+                <span class="text-blue-600">g</span>
+                <span class="text-green-600">l</span>
+                <span class="text-red-500">e</span>
+                <span class="text-slate-700 text-base font-normal ml-2 hidden sm:inline">Certified Educator Exam Simulator</span>
+            </div>
+            <span id="certification-badge" class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-blue-200">
+                Level 1 Practice
+            </span>
+        </div>
+
+        <!-- Controls: Level Switch, Timer, Progress -->
+        <div class="flex items-center space-x-4">
+            <!-- Level Switcher -->
+            <div class="bg-slate-100 p-1 rounded-lg flex text-xs font-medium">
+                <button id="lvl1-btn" onclick="switchLevel(1)" class="px-3 py-1 rounded-md bg-white shadow-xs text-blue-600 font-semibold transition">
+                    Level 1
+                </button>
+                <button id="lvl2-btn" onclick="switchLevel(2)" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition">
+                    Level 2
+                </button>
+            </div>
+
+            <!-- Timer Display -->
+            <div class="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-mono font-semibold text-slate-700">
+                <i class="fa-regular fa-clock mr-2 text-slate-500"></i>
+                <span id="timer-display">180:00</span>
+            </div>
+
+            <!-- Exam Mode Toggle -->
+            <button id="mode-toggle-btn" onclick="toggleExamMode()" class="text-xs bg-slate-800 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-slate-700 transition flex items-center">
+                <i class="fa-solid fa-play mr-1.5 text-[10px]"></i> <span id="mode-text">Start Timed Mode</span>
+            </button>
+
+            <!-- Submit Exam Button -->
+            <button onclick="finishExam()" class="bg-google-green text-white px-3.5 py-1.5 rounded-lg text-xs font-medium hover:bg-green-700 transition shadow-sm flex items-center">
+                <i class="fa-solid fa-paper-plane mr-1.5"></i> Submit Scenario
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="flex flex-1 overflow-hidden">
+
+        <!-- Sidebar: Task Scenarios & Checklist -->
+        <aside class="w-80 md:w-96 bg-white border-r border-slate-200 flex flex-col h-full z-20 shadow-md shrink-0">
+            <!-- Scenario Selector Header -->
+            <div class="p-4 border-b border-slate-200 bg-slate-50">
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Scenario Module</label>
+                <select id="scenario-select" onchange="loadScenario(this.value)" class="w-full text-sm border-slate-300 rounded-lg shadow-xs focus:ring-blue-500 focus:border-blue-500 font-medium p-2 bg-white border">
+                    <option value="sc1">Scenario 1 (L1): Classroom Setup & Doc Sharing</option>
+                    <option value="sc2">Scenario 2 (L1): Forms Assessment & Sheets Analysis</option>
+                    <option value="sc3">Scenario 3 (L2): Multi-Tool Collaboration & Slides</option>
+                    <option value="sc4">Scenario 4 (L2): Advanced Workflow & Data Filtering</option>
+                </select>
+                <!-- Task Progress Bar -->
+                <div class="mt-3">
+                    <div class="flex justify-between text-xs text-slate-600 mb-1">
+                        <span>Practical Task Progress</span>
+                        <span id="progress-text" class="font-bold">0/4 Completed</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2">
+                        <div id="progress-bar" class="bg-google-blue h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Steps Checklist -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="task-checklist-container">
+                <!-- Checklist dynamic content loaded via JS -->
+            </div>
+
+            <!-- AI Coach & Hints Panel -->
+            <div class="border-t border-slate-200 p-4 bg-slate-50">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center text-xs font-bold text-slate-700">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-2"></i>
+                        <span>AI Trainer Assistance</span>
+                    </div>
+                    <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-medium">Google Certified Coach</span>
+                </div>
+                <div id="ai-hint-box" class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 min-h-[70px] flex items-center justify-center text-center italic">
+                    Click "Ask AI Coach" on any task for step-by-step guidance and pedagogical exam tips.
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Workspace: Interactive Simulated Google Workspace Tools -->
+        <main class="flex-1 flex flex-col bg-slate-200 overflow-hidden relative">
+
+            <!-- Simulated App Bar (Google Workspace Launcher Tabs) -->
+            <div class="bg-white border-b border-slate-200 px-4 flex items-center justify-between shadow-xs z-10">
+                <div class="flex space-x-1 overflow-x-auto text-xs" id="app-tabs-list">
+                    <button onclick="switchApp('classroom')" id="tab-classroom" class="px-4 py-3 border-b-2 font-medium flex items-center space-x-2 transition app-active-tab">
+                        <i class="fa-solid fa-chalkboard-user text-green-600"></i>
+                        <span>Google Classroom</span>
+                    </button>
+                    <button onclick="switchApp('docs')" id="tab-docs" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50">
+                        <i class="fa-solid fa-file-lines text-blue-600"></i>
+                        <span>Google Docs</span>
+                    </button>
+                    <button onclick="switchApp('sheets')" id="tab-sheets" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50">
+                        <i class="fa-solid fa-table text-emerald-600"></i>
+                        <span>Google Sheets</span>
+                    </button>
+                    <button onclick="switchApp('forms')" id="tab-forms" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50">
+                        <i class="fa-solid fa-list-check text-purple-600"></i>
+                        <span>Google Forms</span>
+                    </button>
+                    <button onclick="switchApp('slides')" id="tab-slides" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50">
+                        <i class="fa-solid fa-file-powerpoint text-amber-500"></i>
+                        <span>Google Slides</span>
+                    </button>
+                </div>
+                <div class="text-xs text-slate-400 hidden lg:block">
+                    <i class="fa-solid fa-shield-halved text-google-blue mr-1"></i> Interactive Exam Canvas
+                </div>
+            </div>
+
+            <!-- Simulated App Windows -->
+            <div class="flex-1 overflow-hidden p-3 relative">
+
+                <!-- 1. GOOGLE CLASSROOM MOCK -->
+                <div id="app-classroom" class="w-full h-full bg-white rounded-xl shadow-xs border border-slate-200 flex flex-col overflow-hidden">
+                    <div class="bg-emerald-700 text-white p-4 flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                            <div>
+                                <h2 class="font-bold text-lg" id="gc-class-name">Grade 8 Science - Period 3</h2>
+                                <p class="text-xs text-emerald-100">Class Code: <span class="font-mono bg-emerald-800 px-1.5 py-0.5 rounded">x7k9p2</span></p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2 text-xs">
+                            <button onclick="triggerAction('gc-create-topic')" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-md transition font-medium">
+                                <i class="fa-solid fa-plus mr-1"></i> Add Topic
+                            </button>
+                            <button onclick="triggerAction('gc-create-assignment')" class="bg-white text-emerald-800 font-semibold px-3 py-1.5 rounded-md transition hover:bg-emerald-50">
+                                <i class="fa-solid fa-plus mr-1"></i> Create Assignment
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Classroom Stream / Classwork View -->
+                    <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+                        <!-- Stream Feed / Topics -->
+                        <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs flex justify-between items-center">
+                            <div>
+                                <span class="text-xs font-bold text-emerald-700 uppercase tracking-wide">Topic: Ecosystems</span>
+                                <h3 class="font-semibold text-slate-800">Unit 2 Project Brief</h3>
+                                <p class="text-xs text-slate-500 mt-1">Posted today • Due Next Friday</p>
+                            </div>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded">0 Submitted</span>
+                        </div>
+
+                        <!-- Interactive Classwork Creation Card (Hidden by default or dynamic) -->
+                        <div id="gc-new-assignment-box" class="bg-white p-4 rounded-lg border-2 border-emerald-500 shadow-sm hidden">
+                            <h4 class="font-bold text-sm text-slate-800 mb-2">New Assignment Creation</h4>
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <label class="block text-slate-600 mb-1 font-medium">Assignment Title</label>
+                                    <input type="text" id="gc-input-title" placeholder="e.g. Photosynthesis Lab Report" class="w-full border-slate-300 rounded p-2 text-xs border">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-slate-600 mb-1 font-medium">Topic Assignment</label>
+                                        <select id="gc-input-topic" class="w-full border-slate-300 rounded p-2 text-xs border">
+                                            <option value="">No Topic</option>
+                                            <option value="Biology">Biology</option>
+                                            <option value="Ecosystems">Ecosystems</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-slate-600 mb-1 font-medium">Attach File</label>
+                                        <button onclick="attachDriveDoc()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded text-xs border font-medium">
+                                            <i class="fa-brands fa-google-drive text-blue-600 mr-1"></i> Attach Doc
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end space-x-2 pt-2">
+                                    <button onclick="publishAssignment()" class="bg-emerald-600 text-white px-4 py-1.5 rounded font-medium hover:bg-emerald-700">Assign</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Class Feed List -->
+                        <div id="gc-feed-container" class="space-y-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. GOOGLE DOCS MOCK -->
+                <div id="app-docs" class="w-full h-full bg-white rounded-xl shadow-xs border border-slate-200 flex flex-col overflow-hidden hidden">
+                    <!-- Doc Toolbar -->
+                    <div class="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap items-center gap-2 text-xs">
+                        <input type="text" id="doc-title-input" value="Untitled Document" onchange="checkDocTitle()" class="font-medium bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:bg-white px-1 py-0.5 rounded text-sm text-slate-800">
+                        <div class="h-4 w-px bg-slate-300 mx-1"></div>
+                        <button onclick="toggleDocFormat('bold')" class="p-1.5 hover:bg-slate-200 rounded text-slate-700 font-bold" title="Bold">B</button>
+                        <button onclick="toggleDocFormat('italic')" class="p-1.5 hover:bg-slate-200 rounded text-slate-700 italic" title="Italic">I</button>
+                        <button onclick="toggleDocFormat('underline')" class="p-1.5 hover:bg-slate-200 rounded text-slate-700 underline" title="Underline">U</button>
+                        <div class="h-4 w-px bg-slate-300 mx-1"></div>
+                        <select id="doc-heading-select" onchange="applyDocHeading(this.value)" class="border border-slate-300 rounded px-2 py-1 text-xs">
+                            <option value="Normal text">Normal text</option>
+                            <option value="Heading 1">Heading 1</option>
+                            <option value="Heading 2">Heading 2</option>
+                        </select>
+                        <button onclick="insertDocTable()" class="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Insert Table"><i class="fa-solid fa-table-cells"></i> Insert Table</button>
+                        <button onclick="openShareModal()" class="ml-auto bg-google-blue text-white px-3 py-1 rounded-md font-medium hover:bg-blue-700 flex items-center">
+                            <i class="fa-solid fa-lock text-[10px] mr-1.5"></i> Share
+                        </button>
+                    </div>
+
+                    <!-- Doc Canvas -->
+                    <div class="flex-1 overflow-y-auto p-8 bg-slate-100 flex justify-center">
+                        <div class="w-full max-w-2xl bg-white min-h-[500px] shadow-sm p-8 border border-slate-200 rounded" contenteditable="true" id="doc-editor-area" oninput="checkDocContent()">
+                            <h1 class="text-2xl font-bold mb-4 text-slate-800" id="doc-heading-target">Student Group Study Guide</h1>
+                            <p class="text-slate-600 mb-4">Please edit this document according to your practical exam scenario instructions on the left menu.</p>
+                            <div id="doc-inserted-table-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. GOOGLE SHEETS MOCK -->
+                <div id="app-sheets" class="w-full h-full bg-white rounded-xl shadow-xs border border-slate-200 flex flex-col overflow-hidden hidden">
+                    <!-- Sheet Bar & Formula Bar -->
+                    <div class="bg-slate-50 border-b border-slate-200 p-2 text-xs flex items-center space-x-2">
+                        <span class="font-semibold text-emerald-700">fx</span>
+                        <input type="text" id="sheet-formula-input" placeholder="=AVERAGE(B2:B6)" onkeyup="applyFormula(event)" class="flex-1 border border-slate-300 rounded px-2 py-1 font-mono text-xs">
+                        <button onclick="triggerAction('sort-sheet')" class="bg-white border border-slate-300 hover:bg-slate-100 px-2 py-1 rounded font-medium">
+                            <i class="fa-solid fa-filter text-emerald-600 mr-1"></i> Sort A-Z
+                        </button>
+                    </div>
+
+                    <!-- Interactive Grid -->
+                    <div class="flex-1 overflow-auto bg-white p-2">
+                        <table class="w-full border-collapse border border-slate-300 text-xs text-left" id="mock-sheet-table">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 font-semibold">
+                                    <th class="border border-slate-300 p-2 w-10 text-center">#</th>
+                                    <th class="border border-slate-300 p-2">Student Name (A)</th>
+                                    <th class="border border-slate-300 p-2">Quiz Grade % (B)</th>
+                                    <th class="border border-slate-300 p-2">Status (C)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border border-slate-300 p-2 bg-slate-50 text-center font-mono">2</td>
+                                    <td class="border border-slate-300 p-2">Alex Johnson</td>
+                                    <td class="border border-slate-300 p-2 font-mono">88</td>
+                                    <td class="border border-slate-300 p-2 text-green-600 font-medium">Passed</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-slate-300 p-2 bg-slate-50 text-center font-mono">3</td>
+                                    <td class="border border-slate-300 p-2">Maria Garcia</td>
+                                    <td class="border border-slate-300 p-2 font-mono">94</td>
+                                    <td class="border border-slate-300 p-2 text-green-600 font-medium">Passed</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-slate-300 p-2 bg-slate-50 text-center font-mono">4</td>
+                                    <td class="border border-slate-300 p-2">Liam Smith</td>
+                                    <td class="border border-slate-300 p-2 font-mono">72</td>
+                                    <td class="border border-slate-300 p-2 text-amber-600 font-medium">Needs Review</td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-slate-300 p-2 bg-slate-50 text-center font-mono">5</td>
+                                    <td class="border border-slate-300 p-2 bg-yellow-50">Class Average</td>
+                                    <td class="border border-slate-300 p-2 font-mono font-bold text-blue-700 bg-yellow-50" id="cell-average">
+                                        <input type="text" id="cell-average-input" placeholder="Type formula here" onblur="checkSheetFormula()" class="w-full bg-transparent border-none p-0 focus:ring-0 text-xs font-mono">
+                                    </td>
+                                    <td class="border border-slate-300 p-2 bg-yellow-50">--</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 4. GOOGLE FORMS MOCK -->
+                <div id="app-forms" class="w-full h-full bg-white rounded-xl shadow-xs border border-slate-200 flex flex-col overflow-hidden hidden">
+                    <div class="bg-purple-700 text-white p-4 flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-square-poll-vertical text-xl"></i>
+                            <span class="font-bold">Form Builder & Quiz Converter</span>
+                        </div>
+                        <div class="flex items-center space-x-3 text-xs">
+                            <label class="flex items-center space-x-2 cursor-pointer bg-purple-800 px-3 py-1.5 rounded-lg">
+                                <span>Make this a Quiz</span>
+                                <input type="checkbox" id="form-quiz-toggle" onchange="toggleFormQuizSetting()" class="rounded text-purple-600 focus:ring-purple-400">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-6 bg-purple-50 flex justify-center">
+                        <div class="w-full max-w-xl space-y-4">
+                            <!-- Form Header Card -->
+                            <div class="bg-white p-5 rounded-lg border-t-8 border-purple-600 shadow-sm">
+                                <input type="text" id="form-title" value="Science Unit Exit Ticket" class="text-xl font-bold w-full border-b border-transparent hover:border-slate-300 focus:border-purple-600 focus:outline-none mb-1 text-slate-800">
+                                <p class="text-xs text-slate-500">Form Settings: <span id="quiz-status-badge" class="font-semibold text-slate-700">Standard Survey</span></p>
+                            </div>
+
+                            <!-- Question Card -->
+                            <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <input type="text" id="form-q1-title" value="Which process converts sunlight into chemical energy?" class="font-medium text-sm text-slate-800 border-b border-slate-200 w-full focus:outline-none p-1">
+                                    <select class="text-xs border border-slate-300 rounded p-1 ml-2">
+                                        <option>Multiple Choice</option>
+                                        <option>Short Answer</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2 text-xs text-slate-600 pl-2">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="radio" disabled name="q1">
+                                        <span>Respiration</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="radio" disabled name="q1">
+                                        <span class="font-bold text-purple-700">Photosynthesis (Correct)</span>
+                                    </div>
+                                </div>
+                                <div id="answer-key-box" class="pt-3 border-t border-slate-100 hidden flex justify-between items-center text-xs">
+                                    <span class="text-purple-700 font-semibold"><i class="fa-solid fa-key mr-1"></i> Answer Key: 10 Points Assigned</span>
+                                    <button onclick="triggerAction('add-feedback')" class="text-blue-600 hover:underline">Add Answer Feedback</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. GOOGLE SLIDES MOCK -->
+                <div id="app-slides" class="w-full h-full bg-white rounded-xl shadow-xs border border-slate-200 flex flex-col overflow-hidden hidden">
+                    <div class="bg-slate-50 border-b border-slate-200 p-2 flex items-center space-x-2 text-xs">
+                        <span class="font-semibold text-amber-600">Google Slides Studio</span>
+                        <div class="h-4 w-px bg-slate-300"></div>
+                        <button onclick="triggerAction('change-theme')" class="bg-white border border-slate-300 hover:bg-slate-100 px-3 py-1 rounded font-medium text-slate-700">
+                            <i class="fa-solid fa-palette text-amber-500 mr-1"></i> Apply Theme
+                        </button>
+                        <button onclick="triggerAction('add-speaker-note')" class="bg-white border border-slate-300 hover:bg-slate-100 px-3 py-1 rounded font-medium text-slate-700">
+                            <i class="fa-solid fa-note-sticky text-amber-500 mr-1"></i> Add Speaker Notes
+                        </button>
+                    </div>
+
+                    <div class="flex-1 flex overflow-hidden">
+                        <!-- Slide Thumbnails -->
+                        <div class="w-32 bg-slate-100 border-r border-slate-200 p-3 space-y-3 overflow-y-auto">
+                            <div class="aspect-video bg-white border-2 border-amber-500 rounded p-1 shadow-xs cursor-pointer">
+                                <div class="w-full h-full bg-amber-50 rounded flex items-center justify-center text-[10px] text-amber-800 font-bold">Slide 1</div>
+                            </div>
+                        </div>
+
+                        <!-- Active Canvas -->
+                        <div class="flex-1 bg-slate-200 p-6 flex flex-col items-center justify-center">
+                            <div id="slide-active-canvas" class="w-full max-w-lg aspect-video bg-white shadow-md border border-slate-300 rounded-lg p-8 flex flex-col justify-center items-center text-center transition-all">
+                                <h2 class="text-2xl font-bold text-slate-800 mb-2">Solar System Overview</h2>
+                                <p class="text-sm text-slate-500">Interactive Student Presentation</p>
+                            </div>
+                            <!-- Speaker Notes Area -->
+                            <div class="w-full max-w-lg mt-3 bg-white p-2.5 rounded border border-slate-300 text-xs">
+                                <span class="font-bold text-slate-500 block mb-1">Speaker Notes:</span>
+                                <input type="text" id="speaker-note-input" placeholder="Type slide speaker notes here..." onblur="checkSpeakerNotes()" class="w-full border-none focus:outline-none text-slate-700 font-serif">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Share Settings Modal -->
+    <div id="share-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-user-plus text-blue-600 mr-2"></i> Share "Student Group Study Guide"
+                </h3>
+                <button onclick="closeShareModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Add People or Groups</label>
+                <input type="email" id="share-email-input" placeholder="student@school.edu" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Access Level</label>
+                <select id="share-permission-select" class="w-full border border-slate-300 rounded-lg p-2 text-xs">
+                    <option value="viewer">Viewer (Read Only)</option>
+                    <option value="commenter">Commenter</option>
+                    <option value="editor">Editor (Can edit directly)</option>
+                </select>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeShareModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                <button onclick="saveShareSettings()" class="px-4 py-2 text-xs font-medium bg-google-blue text-white rounded-lg hover:bg-blue-700">Save Sharing Permissions</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Scorecard Modal -->
+    <div id="scorecard-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6 space-y-5 border border-slate-200">
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 bg-blue-100 text-google-blue rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">Practical Assessment Results</h2>
+                <p class="text-xs text-slate-500" id="modal-cert-level">Google Certified Educator Level 1 Simulation</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                <div>
+                    <span class="text-xs text-slate-500 block uppercase font-bold">Practical Mastery Score</span>
+                    <span class="text-3xl font-extrabold text-google-blue" id="final-score-percent">0%</span>
+                </div>
+                <div>
+                    <span class="text-xs text-slate-500 block uppercase font-bold">Passing Threshold</span>
+                    <span class="text-3xl font-extrabold text-slate-700">80%</span>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wide">Trainer Detailed Feedback</h4>
+                <div id="feedback-breakdown-list" class="text-xs space-y-2 max-h-48 overflow-y-auto p-1">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-3 border-t border-slate-200">
+                <button onclick="closeScorecard()" class="px-4 py-2 text-xs font-semibold bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg">Review Tasks</button>
+                <button onclick="resetCurrentScenario()" class="px-4 py-2 text-xs font-semibold bg-google-blue text-white hover:bg-blue-700 rounded-lg">Retry Scenario</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Interactive Exam Logic & Practical Task Engine */
+
+        // Scenario Data Structure
+        const scenarios = {
+            sc1: {
+                level: 1,
+                title: "Classroom Setup & Doc Sharing",
+                tasks: [
+                    {
+                        id: 'task1_1',
+                        app: 'classroom',
+                        title: "Create a Topic named 'Ecosystems' in Google Classroom",
+                        hint: "In Google Classroom, click 'Add Topic' button and enter 'Ecosystems'. Topics help organize assignments for students.",
+                        completed: false
+                    },
+                    {
+                        id: 'task1_2',
+                        app: 'docs',
+                        title: "Rename the Google Doc to 'Unit 2 Study Guide'",
+                        hint: "Switch to Google Docs tab. Click on the document title in the top toolbar and type 'Unit 2 Study Guide'.",
+                        completed: false
+                    },
+                    {
+                        id: 'task1_3',
+                        app: 'docs',
+                        title: "Share Doc with 'student@school.edu' as 'Editor'",
+                        hint: "In Google Docs, click the blue 'Share' button. Enter student email and select 'Editor' permission.",
+                        completed: false
+                    },
+                    {
+                        id: 'task1_4',
+                        app: 'docs',
+                        title: "Insert a Table into the Google Doc",
+                        hint: "In Google Docs, click 'Insert Table' on the toolbar to add a structured table for group work.",
+                        completed: false
+                    }
+                ]
+            },
+            sc2: {
+                level: 1,
+                title: "Forms Assessment & Sheets Data Analysis",
+                tasks: [
+                    {
+                        id: 'task2_1',
+                        app: 'forms',
+                        title: "Convert Google Form into an Auto-Graded Quiz",
+                        hint: "Switch to Google Forms tab and toggle 'Make this a Quiz' switch in top bar.",
+                        completed: false
+                    },
+                    {
+                        id: 'task2_2',
+                        app: 'sheets',
+                        title: "Calculate Class Average using =AVERAGE(B2:B4) in Sheets",
+                        hint: "Switch to Google Sheets. Click cell B5 (Class Average) and type formula =AVERAGE(B2:B4) and press enter.",
+                        completed: false
+                    },
+                    {
+                        id: 'task2_3',
+                        app: 'sheets',
+                        title: "Sort Student Roster alphabetically by Name",
+                        hint: "In Google Sheets, click the 'Sort A-Z' button to organize student names alphabetically.",
+                        completed: false
+                    }
+                ]
+            },
+            sc3: {
+                level: 2,
+                title: "Multi-Tool Collaboration & Interactive Slides",
+                tasks: [
+                    {
+                        id: 'task3_1',
+                        app: 'slides',
+                        title: "Apply Presenter Theme to Slide Deck",
+                        hint: "Switch to Google Slides tab and click 'Apply Theme' button.",
+                        completed: false
+                    },
+                    {
+                        id: 'task3_2',
+                        app: 'slides',
+                        title: "Add Speaker Notes to Slide 1",
+                        hint: "Click the Speaker Notes input box below the main slide canvas and type notes.",
+                        completed: false
+                    }
+                ]
+            },
+            sc4: {
+                level: 2,
+                title: "Advanced Workflow & Data Filtering",
+                tasks: [
+                    {
+                        id: 'task4_1',
+                        app: 'sheets',
+                        title: "Sort and Filter Grade Sheet Data",
+                        hint: "In Google Sheets, use the 'Sort A-Z' button to filter and organize student grades.",
+                        completed: false
+                    },
+                    {
+                        id: 'task4_2',
+                        app: 'forms',
+                        title: "Configure Form Feedback and Quiz Settings",
+                        hint: "In Google Forms, enable 'Make this a Quiz' and click 'Add Answer Feedback' to set up automated student feedback.",
+                        completed: false
+                    },
+                    {
+                        id: 'task4_3',
+                        app: 'slides',
+                        title: "Add Presenter Speaker Notes in Google Slides",
+                        hint: "Switch to Google Slides and fill out the speaker notes field below the presentation canvas.",
+                        completed: false
+                    }
+                ]
+            }
+        };
+
+        let currentLevel = 1;
+        let currentScenarioId = 'sc1';
+        let activeApp = 'classroom';
+        let examTimer = null;
+        let timeRemaining = 10800; // 180 mins in seconds
+        let isExamRunning = false;
+
+        // Initialize Application
+        window.onload = function() {
+            loadScenario('sc1');
+        };
+
+        // Switch Certification Level (1 vs 2)
+        function switchLevel(lvl) {
+            currentLevel = lvl;
+            const badge = document.getElementById('certification-badge');
+            const btn1 = document.getElementById('lvl1-btn');
+            const btn2 = document.getElementById('lvl2-btn');
+            const selectEl = document.getElementById('scenario-select');
+
+            if (lvl === 1) {
+                badge.innerText = "Level 1 Practice";
+                btn1.className = "px-3 py-1 rounded-md bg-white shadow-xs text-blue-600 font-semibold transition";
+                btn2.className = "px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition";
+                if (selectEl) selectEl.value = 'sc1';
+                loadScenario('sc1');
+            } else {
+                badge.innerText = "Level 2 Practice";
+                btn2.className = "px-3 py-1 rounded-md bg-white shadow-xs text-blue-600 font-semibold transition";
+                btn1.className = "px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition";
+                if (selectEl) selectEl.value = 'sc3';
+                loadScenario('sc3');
+            }
+        }
+
+        // Load Scenario Tasks into Sidebar
+        function loadScenario(scId) {
+            if (!scenarios[scId]) {
+                console.warn(`Scenario '${scId}' not found, falling back to 'sc1'.`);
+                scId = 'sc1';
+            }
+            currentScenarioId = scId;
+            const sc = scenarios[scId];
+            
+            // Sync scenario selector dropdown if needed
+            const selectEl = document.getElementById('scenario-select');
+            if (selectEl && selectEl.value !== scId) {
+                selectEl.value = scId;
+            }
+
+            const container = document.getElementById('task-checklist-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            sc.tasks.forEach((task, index) => {
+                const item = document.createElement('div');
+                item.className = "p-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 transition space-y-2";
+                item.id = `card-${task.id}`;
+                item.innerHTML = `
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" id="chk-${task.id}" disabled ${task.completed ? 'checked' : ''} class="mt-1 rounded text-blue-600 focus:ring-blue-500">
+                        <div class="flex-1">
+                            <h4 id="txt-${task.id}" class="text-xs font-semibold text-slate-800 ${task.completed ? 'task-completed' : ''}">
+                                ${index + 1}. ${task.title}
+                            </h4>
+                            <span class="inline-block mt-1 text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono uppercase">
+                                Tool: ${task.app}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center pt-1 text-[11px]">
+                        <button onclick="askAITrainer('${task.id}')" class="text-amber-600 hover:text-amber-700 font-medium flex items-center">
+                            <i class="fa-solid fa-lightbulb mr-1"></i> Ask AI Coach
+                        </button>
+                        <button onclick="jumpToApp('${task.app}')" class="text-blue-600 hover:text-blue-800 font-medium">
+                            Go to ${task.app} <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            updateProgress();
+            const hintBox = document.getElementById('ai-hint-box');
+            if (hintBox) {
+                hintBox.innerText = "Click 'Ask AI Coach' on any task for step-by-step guidance and pedagogical exam tips.";
+            }
+        }
+
+        // Load Scenario Tasks into Sidebar
+        function loadScenario(scId) {
+            currentScenarioId = scId;
+            const sc = scenarios[scId];
+            const container = document.getElementById('task-checklist-container');
+            container.innerHTML = '';
+
+            sc.tasks.forEach((task, index) => {
+                const item = document.createElement('div');
+                item.className = "p-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 transition space-y-2";
+                item.id = `card-${task.id}`;
+                item.innerHTML = `
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" id="chk-${task.id}" disabled ${task.completed ? 'checked' : ''} class="mt-1 rounded text-blue-600 focus:ring-blue-500">
+                        <div class="flex-1">
+                            <h4 id="txt-${task.id}" class="text-xs font-semibold text-slate-800 ${task.completed ? 'task-completed' : ''}">
+                                ${index + 1}. ${task.title}
+                            </h4>
+                            <span class="inline-block mt-1 text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono uppercase">
+                                Tool: ${task.app}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center pt-1 text-[11px]">
+                        <button onclick="askAITrainer('${task.id}')" class="text-amber-600 hover:text-amber-700 font-medium flex items-center">
+                            <i class="fa-solid fa-lightbulb mr-1"></i> Ask AI Coach
+                        </button>
+                        <button onclick="jumpToApp('${task.app}')" class="text-blue-600 hover:text-blue-800 font-medium">
+                            Go to ${task.app} <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            updateProgress();
+            document.getElementById('ai-hint-box').innerText = "Click 'Ask AI Coach' on any task for step-by-step guidance and pedagogical exam tips.";
+        }
+
+        // Jump directly to app tab
+        function jumpToApp(appName) {
+            switchApp(appName);
+        }
+
+        // Switch Workspace Tab View
+        function switchApp(appName) {
+            activeApp = appName;
+            const apps = ['classroom', 'docs', 'sheets', 'forms', 'slides'];
+
+            apps.forEach(app => {
+                const el = document.getElementById(`app-${app}`);
+                const tab = document.getElementById(`tab-${app}`);
+                if (app === appName) {
+                    el.classList.remove('hidden');
+                    tab.classList.add('app-active-tab');
+                    tab.classList.remove('border-transparent');
+                } else {
+                    el.classList.add('hidden');
+                    tab.classList.remove('app-active-tab');
+                    tab.classList.add('border-transparent');
+                }
+            });
+        }
+
+        // AI Coach Hint Dispenser
+        function askAITrainer(taskId) {
+            const sc = scenarios[currentScenarioId];
+            const task = sc.tasks.find(t => t.id === taskId);
+            if (task) {
+                const hintBox = document.getElementById('ai-hint-box');
+                hintBox.innerHTML = `
+                    <div class="text-left space-y-1">
+                        <p class="font-semibold text-amber-800 text-xs">💡 Certified Trainer Guidance:</p>
+                        <p class="text-slate-700">${task.hint}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Mark Task Complete
+        function completeTask(taskId) {
+            const sc = scenarios[currentScenarioId];
+            const task = sc.tasks.find(t => t.id === taskId);
+            if (task && !task.completed) {
+                task.completed = true;
+                const chk = document.getElementById(`chk-${taskId}`);
+                const txt = document.getElementById(`txt-${taskId}`);
+                if (chk) chk.checked = true;
+                if (txt) txt.classList.add('task-completed');
+                updateProgress();
+            }
+        }
+
+        // Update Scenario Progress Bar
+        function updateProgress() {
+            const sc = scenarios[currentScenarioId];
+            const completedCount = sc.tasks.filter(t => t.completed).length;
+            const totalCount = sc.tasks.length;
+            const percent = Math.round((completedCount / totalCount) * 100);
+
+            document.getElementById('progress-text').innerText = `${completedCount}/${totalCount} Completed`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        // --- PRACTICAL ACTIONS & EVENT SIMULATIONS ---
+
+        // 1. Google Classroom Action: Create Topic
+        function triggerAction(actionType) {
+            if (actionType === 'gc-create-topic') {
+                const topicName = prompt("Enter new Topic Name for Classroom:", "Ecosystems");
+                if (topicName && topicName.toLowerCase().includes('ecosystem')) {
+                    completeTask('task1_1');
+                    // Add topic UI element
+                    const feed = document.getElementById('gc-feed-container');
+                    const div = document.createElement('div');
+                    div.className = "bg-white p-3 rounded-lg border border-slate-200 text-xs text-emerald-800 font-semibold";
+                    div.innerText = `📁 Topic Created: ${topicName}`;
+                    feed.prepend(div);
+                }
+            } else if (actionType === 'gc-create-assignment') {
+                document.getElementById('gc-new-assignment-box').classList.toggle('hidden');
+            } else if (actionType === 'sort-sheet') {
+                // Sort Sheet Rows
+                completeTask('task2_3');
+            } else if (actionType === 'add-feedback') {
+                const hintBox = document.getElementById('ai-hint-box');
+                if (hintBox) {
+                    hintBox.innerHTML = `
+                        <div class="text-left space-y-1">
+                            <p class="font-semibold text-purple-800 text-xs"><i class="fa-solid fa-check-circle mr-1"></i> Feedback Added:</p>
+                            <p class="text-slate-700 text-xs">Answer feedback and study resource links have been attached to the Google Form question.</p>
+                        </div>
+                    `;
+                }
+            } else if (actionType === 'change-theme') {
+                const slide = document.getElementById('slide-active-canvas');
+                slide.className = "w-full max-w-lg aspect-video bg-slate-900 text-white shadow-md border border-slate-800 rounded-lg p-8 flex flex-col justify-center items-center text-center transition-all";
+                completeTask('task3_1');
+            }
+        }
+
+        // 2. Google Docs: Check Title Rename
+        function checkDocTitle() {
+            const val = document.getElementById('doc-title-input').value;
+            if (val.toLowerCase().includes('unit 2') || val.toLowerCase().includes('study guide')) {
+                completeTask('task1_2');
+            }
+        }
+
+        // 3. Google Docs: Insert Table
+        function insertDocTable() {
+            const container = document.getElementById('doc-inserted-table-container');
+            container.innerHTML = `
+                <table class="w-full border-collapse border border-slate-300 text-xs my-2">
+                    <tr><td class="border p-2 bg-slate-50 font-bold">Group Member</td><td class="border p-2 bg-slate-50 font-bold">Assigned Section</td></tr>
+                    <tr><td class="border p-2">Student A</td><td class="border p-2">Introduction</td></tr>
+                </table>
+            `;
+            completeTask('task1_4');
+        }
+
+        // Sharing Modal Actions
+        function openShareModal() {
+            document.getElementById('share-modal').classList.remove('hidden');
+        }
+
+        function closeShareModal() {
+            document.getElementById('share-modal').classList.add('hidden');
+        }
+
+        function saveShareSettings() {
+            const email = document.getElementById('share-email-input').value;
+            const perm = document.getElementById('share-permission-select').value;
+            if (email.includes('student') && perm === 'editor') {
+                completeTask('task1_3');
+            }
+            closeShareModal();
+        }
+
+        // 4. Google Forms: Toggle Quiz Setting
+        function toggleFormQuizSetting() {
+            const isChecked = document.getElementById('form-quiz-toggle').checked;
+            const badge = document.getElementById('quiz-status-badge');
+            const answerKeyBox = document.getElementById('answer-key-box');
+
+            if (isChecked) {
+                badge.innerText = "Auto-Graded Quiz Mode";
+                badge.className = "font-semibold text-purple-700";
+                answerKeyBox.classList.remove('hidden');
+                completeTask('task2_1');
+            } else {
+                badge.innerText = "Standard Survey";
+                badge.className = "font-semibold text-slate-700";
+                answerKeyBox.classList.add('hidden');
+            }
+        }
+
+        // 5. Google Sheets: Formula Verification
+        function checkSheetFormula() {
+            const val = document.getElementById('cell-average-input').value.toUpperCase().replace(/\s/g, '');
+            if (val.includes('=AVERAGE(B2:B4)') || val.includes('=AVERAGE(B2:B5)')) {
+                document.getElementById('cell-average').innerText = "84.6%";
+                completeTask('task2_2');
+            }
+        }
+
+        function applyFormula(e) {
+            if (e.key === 'Enter') {
+                checkSheetFormula();
+            }
+        }
+
+        // 6. Google Slides: Speaker Notes Check
+        function checkSpeakerNotes() {
+            const val = document.getElementById('speaker-note-input').value;
+            if (val.trim().length > 3) {
+                completeTask('task3_2');
+            }
+        }
+
+        // Timed Exam Controller
+        function toggleExamMode() {
+            const btnText = document.getElementById('mode-text');
+            if (!isExamRunning) {
+                isExamRunning = true;
+                btnText.innerText = "Pause Timed Mode";
+                examTimer = setInterval(updateTimer, 1000);
+            } else {
+                isExamRunning = false;
+                btnText.innerText = "Resume Timed Mode";
+                clearInterval(examTimer);
+            }
+        }
+
+        function updateTimer() {
+            if (timeRemaining <= 0) {
+                clearInterval(examTimer);
+                finishExam();
+                return;
+            }
+            timeRemaining--;
+            const mins = Math.floor(timeRemaining / 60);
+            const secs = timeRemaining % 60;
+            document.getElementById('timer-display').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Submit & Scorecard Generation
+        function finishExam() {
+            const sc = scenarios[currentScenarioId];
+            const completedCount = sc.tasks.filter(t => t.completed).length;
+            const totalCount = sc.tasks.length;
+            const percent = Math.round((completedCount / totalCount) * 100);
+
+            document.getElementById('final-score-percent').innerText = `${percent}%`;
+            document.getElementById('modal-cert-level').innerText = `Google Certified Educator Level ${currentLevel} Simulation - ${sc.title}`;
+
+            const breakdown = document.getElementById('feedback-breakdown-list');
+            breakdown.innerHTML = '';
+
+            sc.tasks.forEach((t, i) => {
+                const item = document.createElement('div');
+                item.className = `p-2 rounded border flex items-center justify-between ${t.completed ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`;
+                item.innerHTML = `
+                    <span>Task ${i+1}: ${t.title}</span>
+                    <span class="font-bold">${t.completed ? 'PASSED ✓' : 'INCOMPLETE ✗'}</span>
+                `;
+                breakdown.appendChild(item);
+            });
+
+            document.getElementById('scorecard-modal').classList.remove('hidden');
+        }
+
+        function closeScorecard() {
+            document.getElementById('scorecard-modal').classList.add('hidden');
+        }
+
+        function resetCurrentScenario() {
+            closeScorecard();
+            const sc = scenarios[currentScenarioId];
+            sc.tasks.forEach(t => t.completed = false);
+            loadScenario(currentScenarioId);
+        }
+    </script>
+</body>
+</html>
