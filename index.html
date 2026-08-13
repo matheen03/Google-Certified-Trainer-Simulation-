@@ -89,6 +89,11 @@
                 </button>
             </div>
 
+            <!-- AI Scenario Generator Modal Launcher Button -->
+            <button onclick="openAIScenarioModal()" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:from-purple-700 hover:to-indigo-700 transition shadow-sm flex items-center">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-amber-300"></i> ✨ Generate AI Scenario
+            </button>
+
             <!-- Timer Display -->
             <div class="flex items-center bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-mono font-semibold text-slate-700">
                 <i class="fa-regular fa-clock mr-2 text-slate-500"></i>
@@ -119,13 +124,13 @@
                     <option value="sc1">Scenario 1 (L1): Classroom Setup & Doc Sharing</option>
                     <option value="sc2">Scenario 2 (L1): Forms Assessment & Sheets Analysis</option>
                     <option value="sc3">Scenario 3 (L2): Multi-Tool Collaboration & Slides</option>
-                    <option value="sc4">Scenario 4 (L2): Advanced Workflow & Data Filtering</option>
+                    <option value="sc4">Scenario 4 (L2): Drive Folder & Calendar Google Meet Event</option>
                 </select>
                 <!-- Task Progress Bar -->
                 <div class="mt-3">
                     <div class="flex justify-between text-xs text-slate-600 mb-1">
                         <span>Practical Task Progress</span>
-                        <span id="progress-text" class="font-bold">0/4 Completed</span>
+                        <span id="progress-text" class="font-bold">0/3 Completed</span>
                     </div>
                     <div class="w-full bg-slate-200 rounded-full h-2">
                         <div id="progress-bar" class="bg-google-blue h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
@@ -143,12 +148,19 @@
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center text-xs font-bold text-slate-700">
                         <i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-2"></i>
-                        <span>AI Trainer Assistance</span>
+                        <span>AI Trainer & Pedagogy Coach</span>
                     </div>
-                    <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-medium">Google Certified Coach</span>
+                    <span class="text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-medium border border-purple-200">Gemini 3 Powered</span>
                 </div>
-                <div id="ai-hint-box" class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 min-h-[70px] flex items-center justify-center text-center italic">
-                    Click "Ask AI Coach" on any task for step-by-step guidance and pedagogical exam tips.
+                <div id="ai-hint-box" class="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200 min-h-[70px] flex items-center justify-center text-center italic mb-2">
+                    Click "Ask AI Coach" on any task or type a custom question below for Google Certified exam strategies.
+                </div>
+                <!-- Custom Prompt Bar for AI Coach -->
+                <div class="flex space-x-1.5">
+                    <input type="text" id="ai-coach-prompt-input" placeholder="Ask AI Coach (e.g. 'How to teach SAMR?')" class="flex-1 text-xs border border-slate-300 rounded-md p-1.5 focus:ring-1 focus:ring-purple-500 focus:outline-none">
+                    <button onclick="askAITrainerCustom()" id="ai-coach-send-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -159,28 +171,36 @@
             <!-- Simulated App Bar (Google Workspace Launcher Tabs) -->
             <div class="bg-white border-b border-slate-200 px-4 flex items-center justify-between shadow-xs z-10">
                 <div class="flex space-x-1 overflow-x-auto text-xs" id="app-tabs-list">
-                    <button onclick="switchApp('classroom')" id="tab-classroom" class="px-4 py-3 border-b-2 font-medium flex items-center space-x-2 transition app-active-tab">
+                    <button onclick="switchApp('classroom')" id="tab-classroom" class="px-4 py-3 border-b-2 font-medium flex items-center space-x-2 transition app-active-tab whitespace-nowrap">
                         <i class="fa-solid fa-chalkboard-user text-green-600"></i>
-                        <span>Google Classroom</span>
+                        <span>Classroom</span>
                     </button>
-                    <button onclick="switchApp('docs')" id="tab-docs" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50">
+                    <button onclick="switchApp('docs')" id="tab-docs" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50 whitespace-nowrap">
                         <i class="fa-solid fa-file-lines text-blue-600"></i>
-                        <span>Google Docs</span>
+                        <span>Docs</span>
                     </button>
-                    <button onclick="switchApp('sheets')" id="tab-sheets" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50">
+                    <button onclick="switchApp('sheets')" id="tab-sheets" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50 whitespace-nowrap">
                         <i class="fa-solid fa-table text-emerald-600"></i>
-                        <span>Google Sheets</span>
+                        <span>Sheets</span>
                     </button>
-                    <button onclick="switchApp('forms')" id="tab-forms" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50">
+                    <button onclick="switchApp('forms')" id="tab-forms" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50 whitespace-nowrap">
                         <i class="fa-solid fa-list-check text-purple-600"></i>
-                        <span>Google Forms</span>
+                        <span>Forms</span>
                     </button>
-                    <button onclick="switchApp('slides')" id="tab-slides" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50">
+                    <button onclick="switchApp('slides')" id="tab-slides" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50 whitespace-nowrap">
                         <i class="fa-solid fa-file-powerpoint text-amber-500"></i>
-                        <span>Google Slides</span>
+                        <span>Slides</span>
+                    </button>
+                    <button onclick="switchApp('drive')" id="tab-drive" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50 whitespace-nowrap">
+                        <i class="fa-brands fa-google-drive text-amber-600"></i>
+                        <span>Drive</span>
+                    </button>
+                    <button onclick="switchApp('calendar')" id="tab-calendar" class="px-4 py-3 border-b-2 border-transparent text-slate-600 font-medium flex items-center space-x-2 transition hover:bg-slate-50 whitespace-nowrap">
+                        <i class="fa-solid fa-calendar-days text-blue-500"></i>
+                        <span>Calendar</span>
                     </button>
                 </div>
-                <div class="text-xs text-slate-400 hidden lg:block">
+                <div class="text-xs text-slate-400 hidden lg:block shrink-0">
                     <i class="fa-solid fa-shield-halved text-google-blue mr-1"></i> Interactive Exam Canvas
                 </div>
             </div>
@@ -199,6 +219,9 @@
                             </div>
                         </div>
                         <div class="flex space-x-2 text-xs">
+                            <button onclick="generateAIClassroomAnnouncement()" class="bg-gradient-to-r from-purple-600 to-emerald-600 hover:brightness-110 text-white font-medium px-3 py-1.5 rounded-md transition shadow-xs flex items-center">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-300 mr-1.5"></i> Draft Stream Post with AI
+                            </button>
                             <button onclick="triggerAction('gc-create-topic')" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-md transition font-medium">
                                 <i class="fa-solid fa-plus mr-1"></i> Add Topic
                             </button>
@@ -220,7 +243,7 @@
                             <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded">0 Submitted</span>
                         </div>
 
-                        <!-- Interactive Classwork Creation Card (Hidden by default or dynamic) -->
+                        <!-- Interactive Classwork Creation Card -->
                         <div id="gc-new-assignment-box" class="bg-white p-4 rounded-lg border-2 border-emerald-500 shadow-sm hidden">
                             <h4 class="font-bold text-sm text-slate-800 mb-2">New Assignment Creation</h4>
                             <div class="space-y-3 text-xs">
@@ -273,6 +296,9 @@
                             <option value="Heading 2">Heading 2</option>
                         </select>
                         <button onclick="insertDocTable()" class="p-1.5 hover:bg-slate-200 rounded text-slate-700" title="Insert Table"><i class="fa-solid fa-table-cells"></i> Insert Table</button>
+                        <button onclick="generateAIDocContent()" class="bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300 px-2.5 py-1 rounded-md font-medium flex items-center transition">
+                            <i class="fa-solid fa-wand-magic-sparkles text-purple-600 mr-1.5"></i> Draft Content with Gemini AI
+                        </button>
                         <button onclick="openShareModal()" class="ml-auto bg-google-blue text-white px-3 py-1 rounded-md font-medium hover:bg-blue-700 flex items-center">
                             <i class="fa-solid fa-lock text-[10px] mr-1.5"></i> Share
                         </button>
@@ -350,44 +376,33 @@
                             <span class="font-bold">Form Builder & Quiz Converter</span>
                         </div>
                         <div class="flex items-center space-x-3 text-xs">
+                            <button onclick="generateAIQuizQuestion()" class="bg-purple-900 hover:bg-purple-800 border border-purple-400 px-3 py-1.5 rounded-lg text-white font-medium flex items-center transition">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-300 mr-1.5"></i> AI Generate Quiz Item
+                            </button>
                             <label class="flex items-center space-x-2 cursor-pointer bg-purple-800 px-3 py-1.5 rounded-lg">
                                 <span>Make this a Quiz</span>
                                 <input type="checkbox" id="form-quiz-toggle" onchange="toggleFormQuizSetting()" class="rounded text-purple-600 focus:ring-purple-400">
                             </label>
                         </div>
                     </div>
+                    <div class="flex-1 overflow-y-auto p-6 bg-purple-50 flex flex-col items-center space-y-4">
+                        <div class="w-full max-w-2xl bg-white p-6 rounded-xl border-t-8 border-purple-700 shadow-sm border border-slate-200">
+                            <input type="text" value="Unit 2 Science Quiz" class="text-xl font-bold text-slate-800 border-b border-transparent hover:border-slate-300 focus:border-purple-600 focus:outline-none w-full mb-2">
+                            <p class="text-xs text-slate-500">Form Status: <span id="quiz-status-badge" class="font-semibold text-slate-700">Standard Survey</span></p>
+                        </div>
 
-                    <div class="flex-1 overflow-y-auto p-6 bg-purple-50 flex justify-center">
-                        <div class="w-full max-w-xl space-y-4">
-                            <!-- Form Header Card -->
-                            <div class="bg-white p-5 rounded-lg border-t-8 border-purple-600 shadow-sm">
-                                <input type="text" id="form-title" value="Science Unit Exit Ticket" class="text-xl font-bold w-full border-b border-transparent hover:border-slate-300 focus:border-purple-600 focus:outline-none mb-1 text-slate-800">
-                                <p class="text-xs text-slate-500">Form Settings: <span id="quiz-status-badge" class="font-semibold text-slate-700">Standard Survey</span></p>
+                        <div class="w-full max-w-2xl bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                            <label class="block text-xs font-bold text-slate-500 uppercase">Question 1</label>
+                            <input type="text" id="form-q1-title" value="What is the primary product of photosynthesis?" class="w-full text-sm font-medium border border-slate-300 rounded-md p-2 focus:ring-1 focus:ring-purple-500">
+                            <div class="space-y-2 pt-2 text-xs text-slate-600">
+                                <div class="flex items-center space-x-2"><input type="radio" name="q1" disabled checked> <span>Oxygen and Glucose</span></div>
+                                <div class="flex items-center space-x-2"><input type="radio" name="q1" disabled> <span>Carbon Dioxide</span></div>
+                                <div class="flex items-center space-x-2"><input type="radio" name="q1" disabled> <span>Nitrogen</span></div>
                             </div>
-
-                            <!-- Question Card -->
-                            <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <input type="text" id="form-q1-title" value="Which process converts sunlight into chemical energy?" class="font-medium text-sm text-slate-800 border-b border-slate-200 w-full focus:outline-none p-1">
-                                    <select class="text-xs border border-slate-300 rounded p-1 ml-2">
-                                        <option>Multiple Choice</option>
-                                        <option>Short Answer</option>
-                                    </select>
-                                </div>
-                                <div class="space-y-2 text-xs text-slate-600 pl-2">
-                                    <div class="flex items-center space-x-2">
-                                        <input type="radio" disabled name="q1">
-                                        <span>Respiration</span>
-                                    </div>
-                                    <div class="flex items-center space-x-2">
-                                        <input type="radio" disabled name="q1">
-                                        <span class="font-bold text-purple-700">Photosynthesis (Correct)</span>
-                                    </div>
-                                </div>
-                                <div id="answer-key-box" class="pt-3 border-t border-slate-100 hidden flex justify-between items-center text-xs">
-                                    <span class="text-purple-700 font-semibold"><i class="fa-solid fa-key mr-1"></i> Answer Key: 10 Points Assigned</span>
-                                    <button onclick="triggerAction('add-feedback')" class="text-blue-600 hover:underline">Add Answer Feedback</button>
-                                </div>
+                            <div id="answer-key-box" class="hidden pt-3 border-t border-slate-200">
+                                <button onclick="triggerAction('add-feedback')" class="text-xs text-purple-700 hover:text-purple-900 font-semibold flex items-center">
+                                    <i class="fa-solid fa-plus-circle mr-1"></i> Add Automated Answer Feedback
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -395,42 +410,202 @@
 
                 <!-- 5. GOOGLE SLIDES MOCK -->
                 <div id="app-slides" class="w-full h-full bg-white rounded-xl shadow-xs border border-slate-200 flex flex-col overflow-hidden hidden">
-                    <div class="bg-slate-50 border-b border-slate-200 p-2 flex items-center space-x-2 text-xs">
-                        <span class="font-semibold text-amber-600">Google Slides Studio</span>
-                        <div class="h-4 w-px bg-slate-300"></div>
-                        <button onclick="triggerAction('change-theme')" class="bg-white border border-slate-300 hover:bg-slate-100 px-3 py-1 rounded font-medium text-slate-700">
-                            <i class="fa-solid fa-palette text-amber-500 mr-1"></i> Apply Theme
-                        </button>
-                        <button onclick="triggerAction('add-speaker-note')" class="bg-white border border-slate-300 hover:bg-slate-100 px-3 py-1 rounded font-medium text-slate-700">
-                            <i class="fa-solid fa-note-sticky text-amber-500 mr-1"></i> Add Speaker Notes
+                    <div class="bg-amber-600 text-white p-3 flex justify-between items-center text-xs">
+                        <div class="flex items-center space-x-2 font-semibold">
+                            <i class="fa-solid fa-file-powerpoint text-lg"></i>
+                            <span>Ecosystems Presentation</span>
+                        </div>
+                        <button onclick="triggerAction('change-theme')" class="bg-amber-800 hover:bg-amber-900 px-3 py-1.5 rounded-md text-white font-medium transition flex items-center">
+                            <i class="fa-solid fa-palette mr-1.5"></i> Apply Theme
                         </button>
                     </div>
+                    <div class="flex-1 overflow-hidden flex bg-slate-200 p-4 space-x-4">
+                        <!-- Slide Sidebar Thumbnails -->
+                        <div class="w-32 flex flex-col space-y-2">
+                            <div class="bg-white p-2 border-2 border-amber-500 rounded shadow-xs text-[10px] font-bold text-slate-700 aspect-video flex items-center justify-center cursor-pointer">
+                                Slide 1
+                            </div>
+                        </div>
+                        <!-- Active Slide Canvas -->
+                        <div class="flex-1 flex flex-col items-center justify-between">
+                            <div id="slide-active-canvas" class="w-full max-w-lg aspect-video bg-white text-slate-800 shadow-md border border-slate-300 rounded-lg p-8 flex flex-col justify-center items-center text-center transition-all">
+                                <h2 class="text-2xl font-bold mb-2">Ecosystems & Biodiversity</h2>
+                                <p class="text-xs text-slate-500">Grade 8 Science Module</p>
+                            </div>
+                            <!-- Speaker Notes -->
+                            <div class="w-full max-w-lg bg-white rounded-lg border border-slate-300 p-3 mt-3">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Speaker Notes</label>
+                                <textarea id="speaker-note-input" onkeyup="checkSpeakerNotes()" placeholder="Click to add speaker notes for presenter..." class="w-full text-xs border border-slate-200 rounded p-2 focus:ring-1 focus:ring-amber-500 resize-none h-16"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    <div class="flex-1 flex overflow-hidden">
-                        <!-- Slide Thumbnails -->
-                        <div class="w-32 bg-slate-100 border-r border-slate-200 p-3 space-y-3 overflow-y-auto">
-                            <div class="aspect-video bg-white border-2 border-amber-500 rounded p-1 shadow-xs cursor-pointer">
-                                <div class="w-full h-full bg-amber-50 rounded flex items-center justify-center text-[10px] text-amber-800 font-bold">Slide 1</div>
+                <!-- 6. GOOGLE DRIVE MOCK -->
+                <div id="app-drive" class="w-full h-full bg-white rounded-xl shadow-xs border border-slate-200 flex flex-col overflow-hidden hidden">
+                    <!-- Drive Toolbar -->
+                    <div class="bg-slate-50 border-b border-slate-200 p-3 flex items-center justify-between">
+                        <div class="flex items-center space-x-3 flex-1 max-w-md">
+                            <div class="relative w-full">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                                <input type="text" placeholder="Search in Drive..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white">
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="promptCreateFolder()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium shadow-xs flex items-center transition">
+                                <i class="fa-solid fa-folder-plus mr-1.5"></i> + New Folder
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Drive Storage Workspace -->
+                    <div class="flex-1 overflow-y-auto p-6 bg-slate-50">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Folders</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="drive-folders-container">
+                            <!-- Existing Folder Item -->
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-center space-x-3 shadow-2xs">
+                                <i class="fa-solid fa-folder text-amber-500 text-xl"></i>
+                                <div class="overflow-hidden">
+                                    <h4 class="text-xs font-semibold text-slate-800 truncate">Classroom Curriculum</h4>
+                                    <p class="text-[10px] text-slate-400">3 items</p>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Active Canvas -->
-                        <div class="flex-1 bg-slate-200 p-6 flex flex-col items-center justify-center">
-                            <div id="slide-active-canvas" class="w-full max-w-lg aspect-video bg-white shadow-md border border-slate-300 rounded-lg p-8 flex flex-col justify-center items-center text-center transition-all">
-                                <h2 class="text-2xl font-bold text-slate-800 mb-2">Solar System Overview</h2>
-                                <p class="text-sm text-slate-500">Interactive Student Presentation</p>
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-6 mb-3">Recent Files</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-center space-x-3 shadow-2xs">
+                                <i class="fa-solid fa-file-lines text-blue-600 text-xl"></i>
+                                <div class="overflow-hidden">
+                                    <h4 class="text-xs font-semibold text-slate-800 truncate">Unit 2 Study Guide</h4>
+                                    <p class="text-[10px] text-slate-400">Google Doc</p>
+                                </div>
                             </div>
-                            <!-- Speaker Notes Area -->
-                            <div class="w-full max-w-lg mt-3 bg-white p-2.5 rounded border border-slate-300 text-xs">
-                                <span class="font-bold text-slate-500 block mb-1">Speaker Notes:</span>
-                                <input type="text" id="speaker-note-input" placeholder="Type slide speaker notes here..." onblur="checkSpeakerNotes()" class="w-full border-none focus:outline-none text-slate-700 font-serif">
+                            <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-center space-x-3 shadow-2xs">
+                                <i class="fa-solid fa-table text-emerald-600 text-xl"></i>
+                                <div class="overflow-hidden">
+                                    <h4 class="text-xs font-semibold text-slate-800 truncate">Grade Roster</h4>
+                                    <p class="text-[10px] text-slate-400">Google Sheet</p>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. GOOGLE CALENDAR MOCK -->
+                <div id="app-calendar" class="w-full h-full bg-white rounded-xl shadow-xs border border-slate-200 flex flex-col overflow-hidden hidden">
+                    <!-- Calendar Top Bar -->
+                    <div class="bg-slate-50 border-b border-slate-200 p-3 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <button onclick="openCalendarModal()" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs px-3 py-1.5 rounded-full font-semibold shadow-xs flex items-center">
+                                <i class="fa-solid fa-plus text-google-blue mr-2 text-sm"></i> Create Event
+                            </button>
+                            <h2 class="text-base font-bold text-slate-800">August 2026</h2>
+                        </div>
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2.5 py-1 rounded-md font-medium">Weekly View</span>
+                    </div>
+
+                    <!-- Calendar Schedule View -->
+                    <div class="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-3" id="calendar-events-container">
+                        <div class="text-xs font-semibold text-slate-500 mb-2">Upcoming Events & Meetings</div>
+                        <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs border-l-4 border-l-blue-500 flex justify-between items-center">
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-800">Department Sync</h4>
+                                <p class="text-[11px] text-slate-500">Tomorrow • 10:00 AM - 11:00 AM</p>
+                            </div>
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">Confirmed</span>
                         </div>
                     </div>
                 </div>
 
             </div>
         </main>
+    </div>
+
+    <!-- Calendar Event Modal -->
+    <div id="calendar-event-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-calendar-plus text-blue-600 mr-2"></i> Create Calendar Event
+                </h3>
+                <button onclick="closeCalendarModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Event Title</label>
+                    <input type="text" id="cal-title-input" placeholder="e.g. Parent-Teacher Conference" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-blue-500">
+                </div>
+
+                <!-- Google Meet Video Conference Toggle -->
+                <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-video text-blue-600 text-lg"></i>
+                        <div>
+                            <span class="font-semibold text-slate-800 block">Google Meet Video Conferencing</span>
+                            <span class="text-[10px] text-slate-500" id="meet-status-text">Not added</span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="toggleGoogleMeetLink()" id="btn-add-meet" class="bg-google-blue hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-md font-medium transition">
+                        Add Google Meet
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Add Guests (Email)</label>
+                    <input type="email" id="cal-guests-input" placeholder="parents@school.edu" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                <button onclick="closeCalendarModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                <button onclick="saveCalendarEvent()" class="px-4 py-2 text-xs font-medium bg-google-blue text-white rounded-lg hover:bg-blue-700">Save Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Custom Scenario Modal -->
+    <div id="ai-scenario-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-wand-magic-sparkles text-purple-600 mr-2"></i> Generate AI Practice Scenario
+                </h3>
+                <button onclick="closeAIScenarioModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-600">Enter your grade level and subject topic. Gemini AI will generate a realistic, custom Google Certified Educator practical scenario complete with step-by-step tasks and hints.</p>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Target Certification Level</label>
+                    <select id="ai-gen-level" class="w-full border border-slate-300 rounded-lg p-2 bg-white">
+                        <option value="1">Level 1 (Foundational Workspace Integration)</option>
+                        <option value="2">Level 2 (Advanced Workflows & Pedagogy)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Grade Level / Audience</label>
+                    <input type="text" id="ai-gen-grade" placeholder="e.g. 7th Grade, High School Biology, Staff Professional Development" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Curriculum Topic / Subject Focus</label>
+                    <input type="text" id="ai-gen-topic" placeholder="e.g. Parent Meetings, Photosynthesis, Data Analysis" class="w-full border border-slate-300 rounded-lg p-2 focus:ring-purple-500">
+                </div>
+            </div>
+
+            <div id="ai-gen-status" class="hidden text-xs text-purple-700 bg-purple-50 p-3 rounded-lg border border-purple-200 flex items-center space-x-2">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <span id="ai-gen-status-text">Gemini is creating custom practical exam tasks...</span>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                <button onclick="closeAIScenarioModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                <button onclick="generateCustomAIScenario()" class="px-4 py-2 text-xs font-medium bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition flex items-center">
+                    <i class="fa-solid fa-bolt mr-1.5"></i> Generate Custom Scenario
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Share Settings Modal -->
@@ -461,6 +636,46 @@
         </div>
     </div>
 
+    <!-- Create Drive Folder Modal -->
+    <div id="folder-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-folder-plus text-blue-600 mr-2"></i> Create Drive Folder
+                </h3>
+                <button onclick="closeFolderModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Folder Name</label>
+                <input type="text" id="folder-name-input" value="Unit 2 Resources" placeholder="e.g. Unit 2 Resources" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeFolderModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                <button onclick="submitCreateFolder()" class="px-4 py-2 text-xs font-medium bg-google-blue text-white rounded-lg hover:bg-blue-700">Create Folder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Classroom Topic Modal -->
+    <div id="topic-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-folder-plus text-emerald-600 mr-2"></i> Add Classroom Topic
+                </h3>
+                <button onclick="closeTopicModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Topic Name</label>
+                <input type="text" id="topic-name-input" value="Ecosystems" placeholder="e.g. Ecosystems" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-emerald-500 focus:border-emerald-500">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeTopicModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                <button onclick="submitCreateTopic()" class="px-4 py-2 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">Add Topic</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Exam Scorecard Modal -->
     <div id="scorecard-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center hidden z-50">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6 space-y-5 border border-slate-200">
@@ -469,7 +684,7 @@
                     <i class="fa-solid fa-award"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">Practical Assessment Results</h2>
-                <p class="text-xs text-slate-500" id="modal-cert-level">Google Certified Educator Level 1 Simulation</p>
+                <p class="text-xs text-slate-500" id="modal-cert-level">Google Certified Educator Level 2 Simulation</p>
             </div>
 
             <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
@@ -499,6 +714,212 @@
 
     <script>
         /* Interactive Exam Logic & Practical Task Engine */
+
+        // Gemini API Engine
+        async function callGeminiAPI(systemPrompt, userQuery, jsonSchema = null) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            if (jsonSchema) {
+                payload.generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: jsonSchema
+                };
+            }
+
+            let delay = 1000;
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Gemini API Error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    return text;
+                } catch (err) {
+                    if (attempt === 2) throw err;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // --- GEMINI AI INTEGRATIONS ---
+
+        function openAIScenarioModal() {
+            const modal = document.getElementById('ai-scenario-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeAIScenarioModal() {
+            const modal = document.getElementById('ai-scenario-modal');
+            if (modal) modal.classList.add('hidden');
+            const statusBox = document.getElementById('ai-gen-status');
+            if (statusBox) statusBox.classList.add('hidden');
+        }
+
+        async function generateCustomAIScenario() {
+            const level = document.getElementById('ai-gen-level').value;
+            const grade = document.getElementById('ai-gen-grade').value || "Middle School";
+            const topic = document.getElementById('ai-gen-topic').value || "General Science Unit";
+
+            const statusBox = document.getElementById('ai-gen-status');
+            const statusText = document.getElementById('ai-gen-status-text');
+            statusBox.classList.remove('hidden');
+            statusText.innerText = `Gemini is designing a Level ${level} exam module for "${topic}"...`;
+
+            const systemPrompt = `You are a Lead Google Certified Trainer and Exam Creator. Create a practical Google Certified Educator Level ${level} exam scenario for a teacher teaching ${grade} about "${topic}". Respond ONLY with valid JSON.`;
+            
+            const jsonSchema = {
+                type: "OBJECT",
+                properties: {
+                    scenarioId: { type: "STRING" },
+                    title: { type: "STRING" },
+                    tasks: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                id: { type: "STRING" },
+                                app: { type: "STRING", description: "Must be one of: classroom, docs, sheets, forms, slides, drive, calendar" },
+                                title: { type: "STRING" },
+                                hint: { type: "STRING" }
+                            },
+                            required: ["id", "app", "title", "hint"]
+                        }
+                    }
+                },
+                required: ["scenarioId", "title", "tasks"]
+            };
+
+            const userQuery = `Generate a realistic 3-4 step scenario for ${grade} topic '${topic}'. Assign appropriate app types from [classroom, docs, sheets, forms, slides, drive, calendar].`;
+
+            try {
+                const responseText = await callGeminiAPI(systemPrompt, userQuery, jsonSchema);
+                const generatedScenario = JSON.parse(responseText);
+
+                generatedScenario.level = parseInt(level, 10);
+                generatedScenario.tasks.forEach(t => t.completed = false);
+
+                const customId = `custom_${Date.now()}`;
+                scenarios[customId] = generatedScenario;
+
+                const selectEl = document.getElementById('scenario-select');
+                const opt = document.createElement('option');
+                opt.value = customId;
+                opt.innerText = `✨ AI: ${generatedScenario.title} (L${level})`;
+                selectEl.appendChild(opt);
+                selectEl.value = customId;
+
+                closeAIScenarioModal();
+                loadScenario(customId);
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "Error generating scenario with Gemini. Please try again.";
+            }
+        }
+
+        async function askAITrainerCustom() {
+            const inputEl = document.getElementById('ai-coach-prompt-input');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            const hintBox = document.getElementById('ai-hint-box');
+            hintBox.innerHTML = `<div class="text-slate-500 italic"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Gemini AI Trainer is analyzing your question...</div>`;
+
+            const systemPrompt = "You are a Google Certified Trainer & Educator Pedagogy Expert. Provide concise, helpful advice (max 3 sentences) for teachers taking the Level 1 or Level 2 exam.";
+            
+            try {
+                const aiReply = await callGeminiAPI(systemPrompt, query);
+                hintBox.innerHTML = `
+                    <div class="text-left space-y-1">
+                        <p class="font-semibold text-purple-800 text-xs">✨ Gemini Trainer Answer:</p>
+                        <p class="text-slate-700 text-xs">${aiReply}</p>
+                    </div>
+                `;
+                inputEl.value = '';
+            } catch (err) {
+                hintBox.innerText = "Could not fetch advice right now. Please try again.";
+            }
+        }
+
+        async function generateAIDocContent() {
+            const docTitle = document.getElementById('doc-title-input').value || "Unit Study Guide";
+            const editor = document.getElementById('doc-editor-area');
+            
+            const originalContent = editor.innerHTML;
+            editor.innerHTML += `<p class="text-purple-600 italic text-xs my-2"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Gemini AI is drafting study guide content...</p>`;
+
+            const systemPrompt = "You are an expert teacher. Write a short 2-paragraph student study guide outline suitable for a Google Doc.";
+            const userQuery = `Write a study guide draft for the topic: "${docTitle}". Include key learning objectives and bullet points. Format with HTML tags like <p>, <ul>, <li>, <strong>.`;
+
+            try {
+                const generatedHtml = await callGeminiAPI(systemPrompt, userQuery);
+                editor.innerHTML = `
+                    <h1 class="text-2xl font-bold mb-4 text-slate-800">${docTitle}</h1>
+                    <div class="prose prose-sm text-slate-700">${generatedHtml}</div>
+                    <div id="doc-inserted-table-container"></div>
+                `;
+                completeTask('task1_2');
+            } catch (err) {
+                editor.innerHTML = originalContent;
+            }
+        }
+
+        async function generateAIClassroomAnnouncement() {
+            const feed = document.getElementById('gc-feed-container');
+            const tempDiv = document.createElement('div');
+            tempDiv.className = "bg-purple-50 p-3 rounded-lg border border-purple-200 text-xs text-purple-800 italic";
+            tempDiv.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Gemini is drafting a friendly classroom stream announcement...`;
+            feed.prepend(tempDiv);
+
+            const systemPrompt = "You are a warm, encouraging teacher. Write a short (2-3 sentences) Google Classroom announcement for students about upcoming project deadlines and office hours.";
+            const userQuery = "Draft a classroom stream announcement.";
+
+            try {
+                const text = await callGeminiAPI(systemPrompt, userQuery);
+                tempDiv.className = "bg-white p-4 rounded-lg border border-slate-200 shadow-2xs space-y-1";
+                tempDiv.innerHTML = `
+                    <div class="flex items-center space-x-2 text-xs text-slate-500 font-semibold mb-1">
+                        <span class="bg-purple-100 text-purple-800 text-[10px] px-2 py-0.5 rounded">✨ AI Generated Announcement</span>
+                        <span>• Just now</span>
+                    </div>
+                    <p class="text-xs text-slate-700">${text}</p>
+                `;
+            } catch (err) {
+                tempDiv.remove();
+            }
+        }
+
+        async function generateAIQuizQuestion() {
+            const qTitle = document.getElementById('form-q1-title');
+            const originalTitle = qTitle.value;
+            qTitle.value = "Gemini is generating a question...";
+
+            const systemPrompt = "You are a teacher creating a multiple choice assessment question. Output concise question text.";
+            const userQuery = "Generate a multiple choice science question about ecosystems or photosynthesis.";
+
+            try {
+                const questionText = await callGeminiAPI(systemPrompt, userQuery);
+                qTitle.value = questionText.replace(/^"|"$/g, '');
+            } catch (err) {
+                qTitle.value = originalTitle;
+            }
+        }
 
         // Scenario Data Structure
         const scenarios = {
@@ -585,27 +1006,27 @@
             },
             sc4: {
                 level: 2,
-                title: "Advanced Workflow & Data Filtering",
+                title: "Drive Folder & Calendar Google Meet Event",
                 tasks: [
                     {
                         id: 'task4_1',
-                        app: 'sheets',
-                        title: "Sort and Filter Grade Sheet Data",
-                        hint: "In Google Sheets, use the 'Sort A-Z' button to filter and organize student grades.",
+                        app: 'drive',
+                        title: "Create a Shared Folder in Google Drive named 'Unit 2 Resources'",
+                        hint: "Switch to Google Drive tab. Click '+ New Folder' button and name the new folder 'Unit 2 Resources'.",
                         completed: false
                     },
                     {
                         id: 'task4_2',
-                        app: 'forms',
-                        title: "Configure Form Feedback and Quiz Settings",
-                        hint: "In Google Forms, enable 'Make this a Quiz' and click 'Add Answer Feedback' to set up automated student feedback.",
+                        app: 'calendar',
+                        title: "Schedule a Calendar Event titled 'Parent-Teacher Conference'",
+                        hint: "Switch to Google Calendar tab. Click '+ Create Event' and enter 'Parent-Teacher Conference' as the event title.",
                         completed: false
                     },
                     {
                         id: 'task4_3',
-                        app: 'slides',
-                        title: "Add Presenter Speaker Notes in Google Slides",
-                        hint: "Switch to Google Slides and fill out the speaker notes field below the presentation canvas.",
+                        app: 'calendar',
+                        title: "Add Google Meet Video Link & Invite 'parents@school.edu' guest",
+                        hint: "In the Calendar Event modal, click 'Add Google Meet' button and enter 'parents@school.edu' in the Guest list before saving.",
                         completed: false
                     }
                 ]
@@ -615,6 +1036,7 @@
         let currentLevel = 1;
         let currentScenarioId = 'sc1';
         let activeApp = 'classroom';
+        let isMeetAdded = false;
         let examTimer = null;
         let timeRemaining = 10800; // 180 mins in seconds
         let isExamRunning = false;
@@ -624,7 +1046,6 @@
             loadScenario('sc1');
         };
 
-        // Switch Certification Level (1 vs 2)
         function switchLevel(lvl) {
             currentLevel = lvl;
             const badge = document.getElementById('certification-badge');
@@ -642,21 +1063,18 @@
                 badge.innerText = "Level 2 Practice";
                 btn2.className = "px-3 py-1 rounded-md bg-white shadow-xs text-blue-600 font-semibold transition";
                 btn1.className = "px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition";
-                if (selectEl) selectEl.value = 'sc3';
-                loadScenario('sc3');
+                if (selectEl) selectEl.value = 'sc4';
+                loadScenario('sc4');
             }
         }
 
-        // Load Scenario Tasks into Sidebar
         function loadScenario(scId) {
             if (!scenarios[scId]) {
-                console.warn(`Scenario '${scId}' not found, falling back to 'sc1'.`);
                 scId = 'sc1';
             }
             currentScenarioId = scId;
             const sc = scenarios[scId];
             
-            // Sync scenario selector dropdown if needed
             const selectEl = document.getElementById('scenario-select');
             if (selectEl && selectEl.value !== scId) {
                 selectEl.value = scId;
@@ -701,71 +1119,36 @@
             }
         }
 
-        // Load Scenario Tasks into Sidebar
-        function loadScenario(scId) {
-            currentScenarioId = scId;
-            const sc = scenarios[scId];
-            const container = document.getElementById('task-checklist-container');
-            container.innerHTML = '';
-
-            sc.tasks.forEach((task, index) => {
-                const item = document.createElement('div');
-                item.className = "p-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 transition space-y-2";
-                item.id = `card-${task.id}`;
-                item.innerHTML = `
-                    <div class="flex items-start space-x-2">
-                        <input type="checkbox" id="chk-${task.id}" disabled ${task.completed ? 'checked' : ''} class="mt-1 rounded text-blue-600 focus:ring-blue-500">
-                        <div class="flex-1">
-                            <h4 id="txt-${task.id}" class="text-xs font-semibold text-slate-800 ${task.completed ? 'task-completed' : ''}">
-                                ${index + 1}. ${task.title}
-                            </h4>
-                            <span class="inline-block mt-1 text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono uppercase">
-                                Tool: ${task.app}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-center pt-1 text-[11px]">
-                        <button onclick="askAITrainer('${task.id}')" class="text-amber-600 hover:text-amber-700 font-medium flex items-center">
-                            <i class="fa-solid fa-lightbulb mr-1"></i> Ask AI Coach
-                        </button>
-                        <button onclick="jumpToApp('${task.app}')" class="text-blue-600 hover:text-blue-800 font-medium">
-                            Go to ${task.app} <i class="fa-solid fa-arrow-right text-[9px] ml-0.5"></i>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-
-            updateProgress();
-            document.getElementById('ai-hint-box').innerText = "Click 'Ask AI Coach' on any task for step-by-step guidance and pedagogical exam tips.";
-        }
-
-        // Jump directly to app tab
         function jumpToApp(appName) {
             switchApp(appName);
         }
 
-        // Switch Workspace Tab View
         function switchApp(appName) {
             activeApp = appName;
-            const apps = ['classroom', 'docs', 'sheets', 'forms', 'slides'];
+            const apps = ['classroom', 'docs', 'sheets', 'forms', 'slides', 'drive', 'calendar'];
 
             apps.forEach(app => {
                 const el = document.getElementById(`app-${app}`);
                 const tab = document.getElementById(`tab-${app}`);
-                if (app === appName) {
-                    el.classList.remove('hidden');
-                    tab.classList.add('app-active-tab');
-                    tab.classList.remove('border-transparent');
-                } else {
-                    el.classList.add('hidden');
-                    tab.classList.remove('app-active-tab');
-                    tab.classList.add('border-transparent');
+                if (el) {
+                    if (app === appName) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+                if (tab) {
+                    if (app === appName) {
+                        tab.classList.add('app-active-tab');
+                        tab.classList.remove('border-transparent');
+                    } else {
+                        tab.classList.remove('app-active-tab');
+                        tab.classList.add('border-transparent');
+                    }
                 }
             });
         }
 
-        // AI Coach Hint Dispenser
         function askAITrainer(taskId) {
             const sc = scenarios[currentScenarioId];
             const task = sc.tasks.find(t => t.id === taskId);
@@ -780,7 +1163,6 @@
             }
         }
 
-        // Mark Task Complete
         function completeTask(taskId) {
             const sc = scenarios[currentScenarioId];
             const task = sc.tasks.find(t => t.id === taskId);
@@ -794,7 +1176,6 @@
             }
         }
 
-        // Update Scenario Progress Bar
         function updateProgress() {
             const sc = scenarios[currentScenarioId];
             const completedCount = sc.tasks.filter(t => t.completed).length;
@@ -805,25 +1186,132 @@
             document.getElementById('progress-bar').style.width = `${percent}%`;
         }
 
-        // --- PRACTICAL ACTIONS & EVENT SIMULATIONS ---
+        // --- GOOGLE DRIVE SIMULATOR ACTIONS ---
+        function promptCreateFolder() {
+            document.getElementById('folder-name-input').value = "Unit 2 Resources";
+            document.getElementById('folder-modal').classList.remove('hidden');
+        }
 
-        // 1. Google Classroom Action: Create Topic
+        function closeFolderModal() {
+            document.getElementById('folder-modal').classList.add('hidden');
+        }
+
+        function submitCreateFolder() {
+            const folderName = document.getElementById('folder-name-input').value.trim();
+            if (folderName) {
+                const folderContainer = document.getElementById('drive-folders-container');
+                const div = document.createElement('div');
+                div.className = "bg-white p-3 rounded-lg border border-slate-200 flex items-center space-x-3 shadow-2xs border-l-4 border-l-blue-500 transition-all";
+                div.innerHTML = `
+                    <i class="fa-solid fa-folder text-blue-600 text-xl"></i>
+                    <div class="overflow-hidden">
+                        <h4 class="text-xs font-semibold text-slate-800 truncate">${folderName}</h4>
+                        <p class="text-[10px] text-slate-400">0 items • Just created</p>
+                    </div>
+                `;
+                folderContainer.appendChild(div);
+
+                if (folderName.toLowerCase().includes('unit 2') || folderName.toLowerCase().includes('resource')) {
+                    completeTask('task4_1');
+                }
+            }
+            closeFolderModal();
+        }
+
+        function openTopicModal() {
+            document.getElementById('topic-name-input').value = "Ecosystems";
+            document.getElementById('topic-modal').classList.remove('hidden');
+        }
+
+        function closeTopicModal() {
+            document.getElementById('topic-modal').classList.add('hidden');
+        }
+
+        function submitCreateTopic() {
+            const topicName = document.getElementById('topic-name-input').value.trim();
+            if (topicName) {
+                if (topicName.toLowerCase().includes('ecosystem')) {
+                    completeTask('task1_1');
+                }
+                const feed = document.getElementById('gc-feed-container');
+                const div = document.createElement('div');
+                div.className = "bg-white p-3 rounded-lg border border-slate-200 text-xs text-emerald-800 font-semibold";
+                div.innerText = `📁 Topic Created: ${topicName}`;
+                feed.prepend(div);
+            }
+            closeTopicModal();
+        }
+
+        // --- GOOGLE CALENDAR & GOOGLE MEET SIMULATOR ACTIONS ---
+        function openCalendarModal() {
+            document.getElementById('calendar-event-modal').classList.remove('hidden');
+        }
+
+        function closeCalendarModal() {
+            document.getElementById('calendar-event-modal').classList.add('hidden');
+        }
+
+        function toggleGoogleMeetLink() {
+            isMeetAdded = !isMeetAdded;
+            const statusText = document.getElementById('meet-status-text');
+            const btn = document.getElementById('btn-add-meet');
+
+            if (isMeetAdded) {
+                statusText.innerText = "Meet Video Link: meet.google.com/abc-defg-hij";
+                statusText.className = "text-[10px] text-emerald-600 font-medium font-mono";
+                btn.innerText = "Remove Google Meet";
+                btn.className = "bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-md font-medium transition";
+            } else {
+                statusText.innerText = "Not added";
+                statusText.className = "text-[10px] text-slate-500";
+                btn.innerText = "Add Google Meet";
+                btn.className = "bg-google-blue hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-md font-medium transition";
+            }
+        }
+
+        function saveCalendarEvent() {
+            const title = document.getElementById('cal-title-input').value.trim();
+            const guests = document.getElementById('cal-guests-input').value.trim();
+
+            if (!title) {
+                alert("Please enter an event title.");
+                return;
+            }
+
+            // Check Task 4.2: Title
+            if (title.toLowerCase().includes('parent-teacher') || title.toLowerCase().includes('conference')) {
+                completeTask('task4_2');
+            }
+
+            // Check Task 4.3: Meet Video link added AND guest parents@school.edu invited
+            if (isMeetAdded && guests.toLowerCase().includes('parents')) {
+                completeTask('task4_3');
+            }
+
+            // Render Event card on Calendar View
+            const container = document.getElementById('calendar-events-container');
+            const card = document.createElement('div');
+            card.className = "bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs border-l-4 border-l-green-500 flex justify-between items-center";
+            card.innerHTML = `
+                <div>
+                    <h4 class="text-xs font-bold text-slate-800">${title}</h4>
+                    <p class="text-[11px] text-slate-500">Friday • 3:00 PM - 4:00 PM ${isMeetAdded ? '• 🎥 Google Meet Attached' : ''}</p>
+                    ${guests ? `<p class="text-[10px] text-blue-600 mt-0.5"><i class="fa-solid fa-user-group mr-1"></i> Guest: ${guests}</p>` : ''}
+                </div>
+                <span class="text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded font-semibold">Scheduled</span>
+            `;
+            container.appendChild(card);
+
+            closeCalendarModal();
+        }
+
+        // Standard Workspace Actions
         function triggerAction(actionType) {
             if (actionType === 'gc-create-topic') {
-                const topicName = prompt("Enter new Topic Name for Classroom:", "Ecosystems");
-                if (topicName && topicName.toLowerCase().includes('ecosystem')) {
-                    completeTask('task1_1');
-                    // Add topic UI element
-                    const feed = document.getElementById('gc-feed-container');
-                    const div = document.createElement('div');
-                    div.className = "bg-white p-3 rounded-lg border border-slate-200 text-xs text-emerald-800 font-semibold";
-                    div.innerText = `📁 Topic Created: ${topicName}`;
-                    feed.prepend(div);
-                }
+                openTopicModal();
             } else if (actionType === 'gc-create-assignment') {
                 document.getElementById('gc-new-assignment-box').classList.toggle('hidden');
             } else if (actionType === 'sort-sheet') {
-                // Sort Sheet Rows
                 completeTask('task2_3');
             } else if (actionType === 'add-feedback') {
                 const hintBox = document.getElementById('ai-hint-box');
@@ -842,7 +1330,6 @@
             }
         }
 
-        // 2. Google Docs: Check Title Rename
         function checkDocTitle() {
             const val = document.getElementById('doc-title-input').value;
             if (val.toLowerCase().includes('unit 2') || val.toLowerCase().includes('study guide')) {
@@ -850,7 +1337,27 @@
             }
         }
 
-        // 3. Google Docs: Insert Table
+        function checkDocContent() {
+            const editor = document.getElementById('doc-editor-area');
+            if (editor && editor.innerText.trim().length > 15) {
+                // Live check handler for document editing
+            }
+        }
+
+        function toggleDocFormat(command) {
+            document.execCommand(command, false, null);
+        }
+
+        function applyDocHeading(headingType) {
+            if (headingType === 'Heading 1') {
+                document.execCommand('formatBlock', false, '<h1>');
+            } else if (headingType === 'Heading 2') {
+                document.execCommand('formatBlock', false, '<h2>');
+            } else {
+                document.execCommand('formatBlock', false, '<p>');
+            }
+        }
+
         function insertDocTable() {
             const container = document.getElementById('doc-inserted-table-container');
             container.innerHTML = `
@@ -862,7 +1369,6 @@
             completeTask('task1_4');
         }
 
-        // Sharing Modal Actions
         function openShareModal() {
             document.getElementById('share-modal').classList.remove('hidden');
         }
@@ -880,7 +1386,6 @@
             closeShareModal();
         }
 
-        // 4. Google Forms: Toggle Quiz Setting
         function toggleFormQuizSetting() {
             const isChecked = document.getElementById('form-quiz-toggle').checked;
             const badge = document.getElementById('quiz-status-badge');
@@ -898,7 +1403,6 @@
             }
         }
 
-        // 5. Google Sheets: Formula Verification
         function checkSheetFormula() {
             const val = document.getElementById('cell-average-input').value.toUpperCase().replace(/\s/g, '');
             if (val.includes('=AVERAGE(B2:B4)') || val.includes('=AVERAGE(B2:B5)')) {
@@ -913,7 +1417,6 @@
             }
         }
 
-        // 6. Google Slides: Speaker Notes Check
         function checkSpeakerNotes() {
             const val = document.getElementById('speaker-note-input').value;
             if (val.trim().length > 3) {
@@ -921,7 +1424,6 @@
             }
         }
 
-        // Timed Exam Controller
         function toggleExamMode() {
             const btnText = document.getElementById('mode-text');
             if (!isExamRunning) {
@@ -947,7 +1449,6 @@
             document.getElementById('timer-display').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
-        // Submit & Scorecard Generation
         function finishExam() {
             const sc = scenarios[currentScenarioId];
             const completedCount = sc.tasks.filter(t => t.completed).length;
